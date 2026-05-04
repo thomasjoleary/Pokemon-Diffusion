@@ -44,6 +44,7 @@ if __name__ == "__main__":
         plt.subplot(2, 6, step + 1)
         plt.title(f"Step {showSteps[step]}")
         plt.imshow(between_0_and_1.detach().numpy())
+        plt.axis('off')
         
     plt.savefig('outputs/linear_noise_test.png')
     plt.show()
