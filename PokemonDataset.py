@@ -19,11 +19,16 @@ class PokemonDataset(Dataset):
 
     def __getitem__(self, idx):
         img_path = os.path.join(self.img_dir, self.images[idx])
-        image = Image.open(img_path).convert('RGB')
+        image = Image.open(img_path).convert('RGBA')
+        # add white background instead of transparent
+        background = Image.new('RGBA', image.size, (255, 255, 255, 255))
+        background.paste(image, mask=image.split()[3])
+        image = background.convert('RGB')
         return self.transform(image)
     
 
 if __name__ == "__main__":
+    # for testing
     dataset = PokemonDataset('Data/pokemon_data/content/pokemon_images/')
     dataloader = DataLoader(dataset, batch_size=32, shuffle=True, num_workers=4)
 
