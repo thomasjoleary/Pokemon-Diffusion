@@ -40,11 +40,11 @@ if __name__ == "__main__":
     
     for step in range(len(showSteps)):
         noisy = sample(img, torch.tensor([showSteps[step]]), alphas).squeeze(0).permute(1, 2, 0)
-        between_0_and_1 = (noisy + 1) / 2
+        between_0_and_1 = (noisy.clamp(-1, 1) + 1) / 2
         plt.subplot(2, 6, step + 1)
         plt.title(f"Step {showSteps[step]}")
         plt.imshow(between_0_and_1.detach().numpy())
         
-    
-    plt.show()
     plt.savefig('outputs/linear_noise_test.png')
+    plt.show()
+    
