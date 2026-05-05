@@ -16,7 +16,7 @@ if __name__ == "__main__":
     #setup
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     dataset = PokemonDataset('Data/pokemon_data/content/pokemon_images/', 'Data/pokemons2.csv')
-    dataloader = DataLoader(dataset, batch_size=8, shuffle=True, num_workers=4)
+    dataloader = DataLoader(dataset, batch_size=32, shuffle=True, num_workers=4)
     betas, alphas = calc_linear_betas_and_alphas()
     model = UNet(base_channels=64).to(device)
     betas, alphas = betas.to(device), alphas.to(device)
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     print("Setup Complete")
     
     # training loop
-    for epoch in range(10):
+    for epoch in range(500):
         print(f"Starting epoch {epoch+1}...")
         for batch in dataloader:
             images, conditions = batch
@@ -40,7 +40,7 @@ if __name__ == "__main__":
             optimizer.step()
             
         print(f"Epoch {epoch}, Loss: {loss.item():.4f}")
-        if (epoch + 1) % 5 == 0:  # save every 5 epochs
+        if (epoch + 1) % 50 == 0:  # save every 50 epochs
             torch.save({
                 'epoch': epoch,
                 'model_state_dict': model.state_dict(),
