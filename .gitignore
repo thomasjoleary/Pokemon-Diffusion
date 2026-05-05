@@ -1,0 +1,16 @@
+# checkpoints
+checkpoints/
+
+# outputs
+outputs/
+
+# python
+__pycache__/
+*.pyc
+*.pyo
+
+# jupyter
+.ipynb_checkpoints/
+
+# misc
+.DS_Store

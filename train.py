@@ -46,7 +46,7 @@ if __name__ == "__main__":
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 'loss': loss.item(),
-            }, f'checkpoints/unet_epoch_{epoch+1}.pt')
+            }, f'/content/drive/MyDrive/pokemon-checkpoints/unet_epoch_{epoch+1}.pt')
             print(f"Checkpoint saved at epoch {epoch+1}")
             
             
