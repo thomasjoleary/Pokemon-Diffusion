@@ -37,6 +37,15 @@ def checkpoint_load(path, model, device):
     start_epoch = checkpoint['epoch'] + 1
     return start_epoch
 
+def generate(model, conditions, betas, alphas, device, chk_no):
+    image = sample_loop(model, conditions, betas, alphas, device)
+    image = image.squeeze(0).permute(1, 2, 0)
+    between_0_and_1 = (image.clamp(-1, 1) + 1) / 2
+    plt.imshow(between_0_and_1.cpu().detach().numpy())
+    os.makedirs(f'outputs/checkpoint_{chk_no}', exist_ok=True)
+    plt.savefig(f"outputs/checkpoint_{chk_no}/sample_{conditions['type1'].item()}_{conditions['type2'].item()}_{conditions['rank'].item()}_{conditions['generation'].item()}.png")
+    plt.close()
+
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = UNet(base_channels=64).to(device)
@@ -44,30 +53,50 @@ if __name__ == "__main__":
     checkpoint_load(f'checkpoints/unet_epoch_{chk_no}.pt', model, device)
     model.eval()
 
-    while True:
-        # conditions
-        type1 = input("Type 1: ")
-        type2 = input("Type 2 (can be none): ")
-        rank = input("Rank (ordinary, baby, legendary, mythical): ")
-        generation = input("Generation (i - ix): ")
-        generation = "generation-" + generation if not generation.startswith("generation") else generation
+    s_or_b = input("Single or batch? (s/b): ")
 
-        conditions = {
-            "type1": torch.tensor([TYPE_TO_IDX[type1.lower()]]).to(device),
-            "type2": torch.tensor([TYPE_TO_IDX[type2.lower()]]).to(device),
-            "rank": torch.tensor([RANK_TO_IDX[rank.lower()]]).to(device),
-            "generation": torch.tensor([GENERATION_TO_IDX[generation.lower()]]).to(device)
-        }
-        betas, alphas = calc_linear_betas_and_alphas()
-        betas, alphas = betas.to(device), alphas.to(device)
-        image = sample_loop(model, conditions, betas, alphas, device)
-        image = image.squeeze(0).permute(1, 2, 0)
-        between_0_and_1 = (image.clamp(-1, 1) + 1) / 2
-        plt.imshow(between_0_and_1.cpu().detach().numpy())
-        os.makedirs(f'outputs/checkpoint_{chk_no}', exist_ok=True)
-        plt.savefig(f"outputs/checkpoint_{chk_no}/sample_{type1}_{type2}_{rank}_{generation}.png")
-        plt.show()
-        sample_again = input("Sample again? (y/n): ")
-        if sample_again.lower() != "y":
-            break
+    betas, alphas = calc_linear_betas_and_alphas()
+    betas, alphas = betas.to(device), alphas.to(device)
+
+    if (s_or_b.lower() == "s"):
+        while True:
+            # conditions
+            type1 = input("Type 1: ")
+            type2 = input("Type 2 (can be none): ")
+            rank = input("Rank (ordinary, baby, legendary, mythical): ")
+            generation = input("Generation (i - ix): ")
+            generation = "generation-" + generation if not generation.startswith("generation") else generation
+
+            conditions = {
+                "type1": torch.tensor([TYPE_TO_IDX[type1.lower()]]).to(device),
+                "type2": torch.tensor([TYPE_TO_IDX[type2.lower()]]).to(device),
+                "rank": torch.tensor([RANK_TO_IDX[rank.lower()]]).to(device),
+                "generation": torch.tensor([GENERATION_TO_IDX[generation.lower()]]).to(device)
+            }
+            
+            generate(model, conditions, betas, alphas, device, chk_no)
+            sample_again = input("Sample again? (y/n): ")
+            if sample_again.lower() != "y":
+                break
+    else:
+        types1 = [t.strip() for t in input("Type 1 list (comma separated): ").split(",")]
+        types2 = [t.strip() for t in input("Type 2 list (comma separated, can be none): ").split(",")]
+        ranks = [r.strip() for r in input("Rank list (comma separated, ordinary/baby/legendary/mythical): ").split(",")]
+        generations = [g.strip() for g in input("Generation list (comma separated, i - ix): ").split(",")]
+        generations = ["generation-" + gen if not gen.startswith("generation") else gen for gen in generations]
+
+        if (len(types1) != len(types2) or len(types1) != len(ranks) or len(types1) != len(generations)):
+            print("All lists must have the same length!")
+            exit(1)
+
+        for cond in range(len(types1)):
+            conditions = {
+                "type1": torch.tensor([TYPE_TO_IDX[types1[cond].lower()]]).to(device),
+                "type2": torch.tensor([TYPE_TO_IDX[types2[cond].lower()]]).to(device),
+                "rank": torch.tensor([RANK_TO_IDX[ranks[cond].lower()]]).to(device),
+                "generation": torch.tensor([GENERATION_TO_IDX[generations[cond].lower()]]).to(device)
+            }
+            
+            generate(model, conditions, betas, alphas, device, chk_no)
+
     
