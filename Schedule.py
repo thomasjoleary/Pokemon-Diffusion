@@ -16,7 +16,7 @@ def calc_linear_betas_and_alphas():
     alphas = calc_alphas(betas)
     return betas, alphas
 
-def sample(image, step, alphas):
+def forward_noise(image, step, alphas):
     # should handle batches
     return torch.sqrt(alphas[step].view(-1, 1, 1, 1)) * image + torch.sqrt(1 - alphas[step].view(-1, 1, 1, 1)) * torch.randn_like(image)
 
@@ -30,7 +30,7 @@ if __name__ == "__main__":
     print(f"Alphas range: {alphas[0]:.4f} to {alphas[-1]:.4f}")
 
     # linear noise visualized
-    dataset = PokemonDataset('Data/pokemon_data/content/pokemon_images/')
+    dataset = PokemonDataset('Data/pokemon_data/content/pokemon_images/', 'Data/pokemons2.csv')
     img = PokemonDataset.__getitem__(dataset, 0).unsqueeze(0)
 
     showSteps = [0, 50, 99, 199, 299, 399, 499, 599, 699, 799, 899, 999]
@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
     
     for step in range(len(showSteps)):
-        noisy = sample(img, torch.tensor([showSteps[step]]), alphas).squeeze(0).permute(1, 2, 0)
+        noisy = forward_noise(img, torch.tensor([showSteps[step]]), alphas).squeeze(0).permute(1, 2, 0)
         between_0_and_1 = (noisy.clamp(-1, 1) + 1) / 2
         plt.subplot(2, 6, step + 1)
         plt.title(f"Step {showSteps[step]}")
