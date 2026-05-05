@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
 import pandas as pd
 import torch
-from UNet import TYPE_TO_IDX, RANK_TO_IDX, GENERATION_TO_IDX
+from UNet import TYPE_TO_IDX, RANK_TO_IDX, GENERATION_TO_IDX, TYPE_VOCAB, RANK_VOCAB, GENERATION_VOCAB
 
 class PokemonDataset(Dataset):
     def __init__(self, img_dir, csv_dir, image_size=256):
@@ -43,6 +43,14 @@ class PokemonDataset(Dataset):
         return image, conditions
 
 
+def condition_test(dex_no):
+    image, cond = dataset[dex_no - 1]
+    print(f"Pokemon #{dex_no} conditions:")
+    print(TYPE_VOCAB[cond['type1'].item()])
+    print(TYPE_VOCAB[cond['type2'].item()])
+    print(RANK_VOCAB[cond['rank'].item()])
+    print(GENERATION_VOCAB[cond['generation'].item()])
+
 if __name__ == "__main__":
     # for testing
     dataset = PokemonDataset('Data/pokemon_data/content/pokemon_images/', 'Data/pokemons2.csv')
@@ -54,3 +62,11 @@ if __name__ == "__main__":
     for key, val in batch[1].items():
         print(f"{key}: {val.squeeze().tolist()}")
 
+    # bulbasaur
+    condition_test(1)
+
+    # tyranitar
+    condition_test(248)
+
+    # noivern
+    condition_test(715)
