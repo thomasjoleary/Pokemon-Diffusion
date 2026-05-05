@@ -191,7 +191,7 @@ class UNet(nn.Module):
         # attention is disabled at the two highest resolutions to keep memory manageable
         self.down0 = DownBlock(ch[0], ch[0], emb_dim, use_attn=False, groups=groups)  # 256->128
         self.down1 = DownBlock(ch[0], ch[1], emb_dim, use_attn=False, groups=groups)  # 128->64
-        self.down2 = DownBlock(ch[1], ch[2], emb_dim, use_attn=True,  groups=groups)  # 64->32
+        self.down2 = DownBlock(ch[1], ch[2], emb_dim, use_attn=False, groups=groups)  # 64->32
         self.down3 = DownBlock(ch[2], ch[3], emb_dim, use_attn=True,  groups=groups)  # 32->16
 
         # bottleneck at 16x16
@@ -200,7 +200,7 @@ class UNet(nn.Module):
         self.mid_res2 = ResBlock(ch[3], ch[3], emb_dim, groups)
 
         self.up3 = UpBlock(ch[3], ch[3], ch[2], emb_dim, use_attn=True,  groups=groups)  # 16->32
-        self.up2 = UpBlock(ch[2], ch[2], ch[1], emb_dim, use_attn=True,  groups=groups)  # 32->64
+        self.up2 = UpBlock(ch[2], ch[2], ch[1], emb_dim, use_attn=False, groups=groups)  # 32->64
         self.up1 = UpBlock(ch[1], ch[1], ch[0], emb_dim, use_attn=False, groups=groups)  # 64->128
         self.up0 = UpBlock(ch[0], ch[0], ch[0], emb_dim, use_attn=False, groups=groups)  # 128->256
 
